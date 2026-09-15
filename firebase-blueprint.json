@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with trading settings and watchlist data",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Firebase Auth UID",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "Trader display name",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "description": "Trader email",
+          "maxLength": 256
+        },
+        "role": {
+          "type": "string",
+          "description": "User subscription tier",
+          "maxLength": 50
+        },
+        "savedWatchlist": {
+          "type": "array",
+          "description": "List of saved stock tickers"
+        },
+        "alertPreferences": {
+          "type": "object",
+          "description": "Notification settings for breakout alerts"
+        },
+        "lastLogin": {
+          "type": "string",
+          "description": "Last sign-in timestamp",
+          "maxLength": 100
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "email"]
+    },
+    "WatchlistItem": {
+      "title": "WatchlistItem",
+      "description": "Individual stock added to user private watchlist",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Ticker symbol or item ID",
+          "maxLength": 30
+        },
+        "ticker": {
+          "type": "string",
+          "description": "Stock ticker symbol",
+          "maxLength": 20
+        },
+        "addedAt": {
+          "type": "string",
+          "description": "ISO timestamp when added",
+          "maxLength": 50
+        },
+        "notes": {
+          "type": "string",
+          "description": "Custom trading setup notes",
+          "maxLength": 1000
+        }
+      },
+      "required": ["id", "ticker"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Trader private profile document"
+    },
+    "/users/{userId}/watchlist/{ticker}": {
+      "schema": "WatchlistItem",
+      "description": "Trader private watchlist items"
+    }
+  }
+}

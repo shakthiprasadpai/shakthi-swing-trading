@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_.\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 256 &&
+             (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
+             (!('role' in data) || (data.role is string && data.role.size() <= 50)) &&
+             (!('savedWatchlist' in data) || (data.savedWatchlist is list && data.savedWatchlist.size() <= 200)) &&
+             (!('lastLogin' in data) || (data.lastLogin is string && data.lastLogin.size() <= 100)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    function isValidWatchlistItem(data) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 30 &&
+             data.ticker is string && data.ticker.size() > 0 && data.ticker.size() <= 20 &&
+             (!('addedAt' in data) || (data.addedAt is string && data.addedAt.size() <= 50)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    // User profile document
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming()) && incoming().id == userId;
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming()) && incoming().id == userId;
+      allow delete: if isOwner(userId);
+
+      // User watchlist subcollection
+      match /watchlist/{ticker} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(ticker) && isValidWatchlistItem(incoming());
+        allow update: if isOwner(userId) && isValidId(ticker) && isValidWatchlistItem(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

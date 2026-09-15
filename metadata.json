@@ -1,0 +1,6 @@
+{
+  "name": "Minervini Trend Trading Scanner",
+  "description": "Scans high-momentum breakout stocks based on Mark Minervini trend templates, Volatility Contraction Patterns (VCP), Average Directional Index (ADX > 25), volume breakout analysis, and Relative Strength comparison against Nifty 50 and S&P 500.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
